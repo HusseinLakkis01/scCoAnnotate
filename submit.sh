@@ -8,7 +8,7 @@
 #PBS -l vmem=125G
 
 
-cd /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/2021_07_15-Pipeline
+cd /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Pipeline
 mkdir -p logs
 
 #conda init bash
@@ -18,4 +18,4 @@ module load snakemake/5.32.0
 module load hydra/R/4.0.5
 module load python/3.6.5_new
 
-snakemake --use-conda --configfile con.yml --cores 3
+snakemake --use-conda --configfile config.yml --cores 3
