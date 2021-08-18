@@ -64,4 +64,16 @@ numpy-groupies==0.9.13
 numpydoc==1.1.0
 ```
 
+## R Libraries:
 
+```
+singleCellNet == 0.1.0
+scibet == 1.0
+SingleR == 1.4.1
+Seurat == 4.0.3
+dplyr == 1.0.7
+tidyr == 1.1.3
+viridis == 0.6.1
+ggsci == 2.9
+tidyverse == 1.3.1
+```
