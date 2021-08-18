@@ -28,7 +28,7 @@ tools_to_run: # List of tools to run
   - <...>
 ```
 
-## An Example COnfig is attached above.
+## An Example Config is attached 
 
 # Tools Available
 
