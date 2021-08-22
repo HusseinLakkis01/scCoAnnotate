@@ -5,9 +5,9 @@ The pipeline also features parallelization options to exploit the computational 
 
 # Installation and Dependencies
 
-Install Snakemake in your linux environment.
+Install [Snakemake](https://snakemake.readthedocs.io/en/stable/) in your linux environment.
 
-You need to have have R Version 4.0.5 and Python 3.6.5.
+You need to have have [R](https://www.r-project.org/) Version 4.0.5 and Python 3.6.5.
 
 ```bash
 $ conda activate base
@@ -53,10 +53,7 @@ tools_to_run: # List of tools to run
 
 ```yaml 
 
-output_dir: Results<img width="507" alt="Screen Shot 2021-08-21 at 10 52 30 PM" src="https://user-images.githubusercontent.com/59002771/130340335-ede960fd-05d2-4983-84a4-37bcd88743a1.png">
-<img width="507" alt="Screen Shot 2021-08-21 at 10 52 30 PM" src="https://user-images.githubusercontent.com/59002771/130340339-ef8e027e-5b38-47a2-aaae-ff626e00e505.png">
-![cell](https://user-images.githubusercontent.com/59002771/130340418-c4723b23-ea88-4cf2-ac73-97756bfe044f.png)
-
+output_dir: Results
 reference: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/joint_mouse.training.csv
 labfile: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/full_labels.csv
 test: /project/kleinman/zahedeh.bashardanesh/from_beluga/2020-11_MANAV/data/S-10068_28741/expr.csv
@@ -101,13 +98,13 @@ snakemake --use-conda --configfile config.yml --cores 3
 
 # Tools Available
 
-1. ACTINN
-2. SciBet
-3. Spearman Correlation
-4. SVM
-5. SVM Rejection
-6. SingleR
-7. SingleCellNet
+1. [ACTINN](https://github.com/mafeiyang/ACTINN)
+2. [SciBet](https://github.com/PaulingLiu/scibet)
+4. [Spearman Correlation](https://statistics.laerd.com/statistical-guides/spearmans-rank-order-correlation-statistical-guide.php)
+5. [SVM](https://scikit-learn.org/stable/modules/svm.html)
+6. SVM Rejection
+7. [SingleR](https://bioconductor.org/packages/release/bioc/html/SingleR.html)
+8. [SingleCellNet](https://github.com/pcahan1/singleCellNet)
 
 and many tools such as scMap Cell and my own classifier are being tested to be integrated in the pipeline.
 
