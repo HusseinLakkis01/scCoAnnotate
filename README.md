@@ -24,7 +24,13 @@ Current version of snakemake is snakemake/5.32.0
 
 # Quickstart
 
-Using snakemake is straight forward and simple. You need to set everything up in a config file and then run the following command:
+Using snakemake is straight forward and simple. The rules and processes are arranged as per this rule graph:
+
+<img width="758" align = 'center' alt="rule_graph" src="https://user-images.githubusercontent.com/59002771/130340625-1239a7ec-dfd5-4005-aa90-c65ada201886.png">
+
+
+
+You need to set everything up in a config file and then run the following command:
 
 ```bash
 snakemake --use-conda --configfile config.yml --cores 3
