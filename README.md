@@ -1,21 +1,36 @@
-# Single-Cell-Prediction-Pipeline
+# Single-Cell-Prediction-Pipeline <img src ="https://user-images.githubusercontent.com/59002771/130340419-3d1eff0b-ecb2-4104-9bf4-1bb968aff433.png" width="50" height="50">
+
+scRNA seq based Prediction of cell-types using a fast and efficient pipeline to increase automation and reduce the need to run several scripts and experiments. The pipeline allows the user to select what single-cell projection tools they want to run.
+The pipeline also features parallelization options to exploit the computational resources available. 
+
+# Installation and Dependencies
+
+Install Snakemake in your linux environment.
+
+You need to have have R Version 4.0.5 and Python 3.6.5.
+
+```bash
+$ conda activate base
+$ mamba create -c conda-forge -c bioconda -n snakemake snakemake
+```
 
 
-scRNA seq based Prediction of cell-types:
 
-# How to use:
+You need to also install all the dependancies for the tools you plan on using. You have to copy everything present in this repository and not break paths because it would disrupt the dependancies. One note is to change the paths in run_ACTINN.py to match your own directories when you clone the repository. The paths are in lines 44,45,49.
 
-You need to have Snakemake installed in your linux enivornment. You need to also install all the dependancies for the tools you plan on using. You have to copy everything present in this repository and not break paths because it would disrupt the dependancies. One note is to change the paths in run_ACTINN.py to match your own directories when you clone the repository. The paths are in lines 44,45,49.
 
-R Version 4.0.5 and Python 3.6.5 are used.
 
 Current version of snakemake is snakemake/5.32.0
+
+# Quickstart
+
+Using snakemake is straight forward and simple. You need to set everything up in a config file and then run the following command:
 
 ```bash
 snakemake --use-conda --configfile config.yml --cores 3
 ```
 
-# Config File:
+##  Config File:
 ```yaml 
 output_dir: <path to outputs directory>
 reference: <path to reference csv file with counts per cell, genes as columns and cells as rows>
@@ -28,7 +43,55 @@ tools_to_run: # List of tools to run
   - <...>
 ```
 
-## An Example Config is attached 
+### An Example Config is attached 
+
+```yaml 
+
+output_dir: Results<img width="507" alt="Screen Shot 2021-08-21 at 10 52 30 PM" src="https://user-images.githubusercontent.com/59002771/130340335-ede960fd-05d2-4983-84a4-37bcd88743a1.png">
+<img width="507" alt="Screen Shot 2021-08-21 at 10 52 30 PM" src="https://user-images.githubusercontent.com/59002771/130340339-ef8e027e-5b38-47a2-aaae-ff626e00e505.png">
+![cell](https://user-images.githubusercontent.com/59002771/130340418-c4723b23-ea88-4cf2-ac73-97756bfe044f.png)
+
+reference: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/joint_mouse.training.csv
+labfile: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/full_labels.csv
+test: /project/kleinman/zahedeh.bashardanesh/from_beluga/2020-11_MANAV/data/S-10068_28741/expr.csv
+rejection: "True"
+tools_to_run:
+      - correlation
+      - SciBet
+      - ACTINN
+      - SVM_reject
+```
+
+## Submission File:
+
+An example of the submission file is also available in this repository and is called submit.sh
+
+``` bash 
+#!/usr/bin/bash
+#PBS -N Snakemake)_Pipeline
+#PBS -o logs/err.txt
+#PBS -e logs/out.txt
+#PBS -l walltime=20:00:00
+#PBS -l nodes=1:ppn=3
+#PBS -l mem=125G
+#PBS -l vmem=125G
+
+# you need to do this step 
+
+cd {root directory of the pipeline}
+mkdir -p logs
+
+# set up the environment
+#conda init bash
+module load miniconda/3.8
+source ~/.conda_init.sh
+module load snakemake/5.32.0
+module load hydra/R/4.0.5
+module load python/3.6.5
+
+# Run the snakemake
+snakemake --use-conda --configfile config.yml --cores 3
+```
 
 # Tools Available
 
@@ -42,9 +105,7 @@ tools_to_run: # List of tools to run
 
 and many tools such as scMap Cell and my own classifier are being tested to be integrated in the pipeline.
 
-# Submission File:
 
-An example of the submission file is also available in this repository and is called submit.sh
 
 # Packages Required:
 
@@ -77,3 +138,4 @@ viridis == 0.6.1
 ggsci == 2.9
 tidyverse == 1.3.1
 ```
+# Adding New Tools:
