@@ -15,7 +15,7 @@ label_correlation <- function(test_expr_mat,
   
   if (prop_common < threshold_common_genes) stop("Proportion of common genes below threshold.")
   
-  # Reducing matrices to common subset
+  # Reducing matrices to common subset to. both test and reference
   mat1 <- as.matrix(test_expr_mat[common_genes, ])
   mat2 <- as.matrix(ref_expr_mat[common_genes, ])
   
