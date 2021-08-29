@@ -1,5 +1,5 @@
 """
-One rule that directs the DAG 
+One rule that directs the DAG which is represented in the rulegraph
 """
 rule all:
   input:
