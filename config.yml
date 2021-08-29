@@ -1,4 +1,4 @@
-output_dir: Zaza_results
+output_dir: /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/example
 reference: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/joint_mouse.training.csv
 labfile: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/full_labels.csv
 test: /project/kleinman/zahedeh.bashardanesh/from_beluga/2020-11_MANAV/data/S-10068_28741/expr.csv
