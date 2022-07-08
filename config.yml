@@ -1,11 +1,27 @@
-output_dir: /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/example
-reference: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/joint_mouse.training.csv
-labfile: /project/kleinman/hussein.lakkis/from_hydra/2021_01_07-Cross_Validation_and_Benchmark/2021_04_05-SVM_and_SVMrej/data/scRNAseq_Benchmark_datasets/Joint_Mouse/full_labels.csv
-test: /project/kleinman/zahedeh.bashardanesh/from_beluga/2020-11_MANAV/data/S-10068_28741/expr.csv
-rejection: "True"
+output_dir: /project/kleinman/hussein.lakkis/from_hydra/test
+reference: /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/reference.csv
+labfile: /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/labels.csv
+test:
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2016062/expression.csv
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2018022/expression.csv
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1190_S-1197/expression.csv
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1569_S-1569/expression.csv
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1694_S-1694_multiome/expression.csv
+      - /home/kleinman/hussein.lakkis/projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1701_S-1701_multiome/expression.csv
+rejection: True
 tools_to_run:
-      - correlation
-      - SciBet
+      - scmapcell
+      - scmapcluster
       - ACTINN
       - SVM_reject
+      - SingleCellNet
+      - SciBet
+      - scHPL
+      - correlation
+
+
+
+
+
+
 

@@ -1,9 +1,12 @@
-args <- commandArgs(TRUE)
+# load libraries
+library(data.table)
+library(SingleR)
+library(SingleCellExperiment)
 
-run_SingleR<-function(DataPath,LabelsPath,TestPath,OutputDir){
+run_SingleR <- function(RefPath,LabelsPath,TestPaths,OutputDirs){
   "
 	Author: Hussein Lakkis
-	Date: 2021-07-22
+	Date: 2022-06-22
 	run  classifier: SingleR 
 	Wrapper script to run an SingleR classifier 
 	outputs lists of true and predicted cell labels as csv files, as well as computation time.
@@ -13,46 +16,90 @@ run_SingleR<-function(DataPath,LabelsPath,TestPath,OutputDir){
 	RefPath : Ref Data file path (.csv), cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
 	LabelsPath : Cell population annotations file path (.csv) .
-	TestPath : Test dataset path : cells-genes matrix with cell unique barcodes 
+	TestPaths : Test dataset paths : cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
-	OutputDir : Output directory defining the path of the exported file.
+	OutputDirs : Output directory defining the path of the exported files for each query.
   "
-  # load libraries
-  library(SingleR)
-  library(Seurat)
-  # read datasets
-  Data <- read.csv(DataPath,row.names = 1)
-  Test <- read.csv(TestPath,row.names = 1)
-  Labels <- as.data.frame(read.csv(LabelsPath))
-  Labels <- as.vector(Labels$label)
-  # Map gene names to upper
-  colnames(Data) <- toupper(  colnames(Data))
-  colnames(Test) <- toupper(  colnames(Test))
-  # transpose data due to SingleCellNet requirements
-  Test <- t(as.matrix(Test))
-  Data = t(as.matrix(Data))  
-  # subset based on common genes
-  commonGenes<-intersect(rownames(Data), rownames(Test))
-  Data <- Data[commonGenes, ]
-  Test <- Test[commonGenes, ]
-  # train and predict
-  start_time <- Sys.time()
-  singler = SingleR(method = "single", Test, Data, Labels)
-  end_time <- Sys.time()
-  # get total time
-  Total_Time_SingleR <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  # tidy up
-  Pred_Labels_SingleR <- as.vector(singler$labels)
-  Pred_Labels_SingleR <- data.frame(singleR_Prediction =Pred_Labels_SingleR,row.names = colnames(Test))
-  # write down predictions
-  write.csv(Pred_Labels_SingleR,paste0(OutputDir,'/SingleR_pred.csv'),row.names = TRUE )
-  write.csv(Total_Time_SingleR,paste0(OutputDir,'/SingleR_test_time.csv'),row.names = FALSE)
-  write.csv(Total_Time_SingleR,paste0(OutputDir,'/SingleR_training_time.csv'),row.names = FALSE)
-  write.csv(singler,paste0(OutputDir,'/SingleR_allpred.csv') )
 
+  # Read the reference data
+  Data <- as.data.frame(fread(RefPath,data.table=FALSE, header = T))
+  row.names(Data) <- Data$V1
+  Data <-  Data[, 2:ncol(Data)]
+  # Read Reference labels
+  print(Data[1:4,1:4])
+
+  Labels <- as.data.frame(read.csv(LabelsPath,row.names = 1))
+  print(head(Labels))
+  #############################################################################
+                                      #SingleR #
+  #############################################################################
+  # prepare data
+  Data <-  t(Data)
+  Labels <- as.factor(Labels$label)
+  # Train SingleR
+  start_time <- Sys.time()
+  print(Data[1:4,1:4])
+  singler <- trainSingleR(Data, labels=Labels)
+  end_time <- Sys.time()
+  Training_Time_SingleR <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+
+  # Loop over test datasets
+  message("@reading test and predicting")
+  # Set a counter
+  i = 1
+  # Loop
+  for(Test in TestPaths){
+      # Get current output for current query
+      OutputDir <- OutputDirs[[i]]
+      # Read Query
+      test <- fread(Test,data.table=FALSE,header = TRUE)
+      row.names(test) <- test$V1
+      test <-  test[, 2:ncol(test)]
+      # save cell names for prediction output
+      cellnames <- row.names(test)
+      test <- t(test)
+      # train and predict
+      start_time <- Sys.time()
+      pred <- classifySingleR(test, singler, assay.type=1)
+      end_time <- Sys.time()
+      # get total time
+      Test_Time_SingleR <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+     # tidy up prediction dataframe
+      Pred_Labels_SingleR <- as.vector(pred$labels)
+      Pred_Labels_SingleR <- data.frame(SingleR =Pred_Labels_SingleR,row.names = cellnames)
+      Test_Time_SingleR <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+      # Create SingleR subdir in target dir
+      dir.create(file.path(OutputDir, "SingleR"), showWarnings = FALSE)
+      setwd(file.path(OutputDir, "SingleR"))
+      # write down and save the output
+      write.csv(Pred_Labels_SingleR,paste('SingleR','_pred.csv', sep = ''))
+      write.csv(Training_Time_SingleR,paste('SingleR','_training_time.csv', sep = ''),row.names = FALSE)
+      write.csv(Test_Time_SingleR,paste('SingleR','_test_time.csv', sep = ''),row.names = FALSE)
+
+      i = i+1
+  }
 }
 
-run_SingleR(args[1], args[2], args[3], args[4])
-sessionInfo()
+# Get Command line arguments
+args <- commandArgs(trailingOnly = TRUE)
+# Split the arguments to form lists
+arguments <- paste(unlist(args),collapse=' ')
+listoptions <- unlist(strsplit(arguments,'--'))[-1]
+# Get individual argument names
+options.args <- sapply(listoptions,function(x){
+         unlist(strsplit(x, ' '))[-1]
+        })
+options.names <- sapply(listoptions,function(x){
+  option <-  unlist(strsplit(x, ' '))[1]
+})
+# Set variables containing command line argument values
+names(options.args) <- unlist(options.names)
+ref <- unlist(options.args['ref'])
+labs <- unlist(options.args['labs'])
+test <- unlist(options.args['test'])
+output_dir <- unlist(options.args['output_dir' ])
+
+run_SingleR(ref,labs, test, output_dir)
+
 
 

@@ -73,7 +73,7 @@ def run_SVM(RefPath, LabelsPath, TestPath, OutputDir):
 	# save output
 	predicted.to_csv("SVM_pred.csv", index = True)
 	tr_time.to_csv("SVM_training_time.csv", index = False)
-	ts_time.to_csv("SVM_testing_time.csv", index = False)
+	ts_time.to_csv("SVM_test_time.csv", index = False)
 
 # run the function
 run_SVM(argv[1], argv[2], argv[3], argv[4])

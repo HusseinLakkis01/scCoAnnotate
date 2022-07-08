@@ -1,9 +1,13 @@
-args <- commandArgs(TRUE)
-
+# loads needed libraries
+library(tidyr)
+library(dplyr)
+library(readr)
+library(Seurat)
+library(data.table)
 # Function to label by Spearman correlation by (Selin Jessa and Marie Coutlier)
 label_correlation <- function(test_expr_mat,
                               ref_expr_mat,
-                              threshold_common_genes = 0.5) {
+                              threshold_common_genes = 0.3) {
   
   rownames(test_expr_mat) <- toupper(rownames(test_expr_mat))
   rownames(ref_expr_mat) <- toupper(rownames(ref_expr_mat))
@@ -39,34 +43,35 @@ label_correlation <- function(test_expr_mat,
   
   }
 
-run_correlation<-function(RefPath,LabelsPath,TestPath,OutputDir){
+
+
+
+
+
+run_correlation<-function(RefPath,LabelsPath,TestPaths,OutputDirs){
   "
 	Author: Hussein Lakkis
-	Date: 2021-07-22
-	run  classifier: Correlation by Selin and Marie 
-	Wrapper script to run an Correlation classifier 
+	Date: 2022-06-23
+	run  classifier: Spearnman Correlation 
+	Wrapper script to run an Spearnman Correlation classifier 
 	outputs lists of true and predicted cell labels as csv files, as well as computation time.
   
-	Parameters
+  Parameters
 	----------
 	RefPath : Ref Data file path (.csv), cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
 	LabelsPath : Cell population annotations file path (.csv) .
-	TestPath : Test dataset path : cells-genes matrix with cell unique barcodes 
+	TestPaths : Test dataset paths : cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
-	OutputDir : Output directory defining the path of the exported file.
+	OutputDirs : Output directory defining the path of the exported files for each query.
   "
-  # loads needed libraries
-  library(here)
-  library(tidyr)
-  library(dplyr)
-  library(readr)
-  library(Seurat)
-  # read Data and labels
-  Data <- read.csv(RefPath,row.names = 1)
+
+  # Read the reference expression matrix
+  Data <- fread(RefPath,data.table=FALSE)
+  row.names(Data) <- Data$V1
+  Data <-  Data[, 2:ncol(Data)]
   Labels <- as.data.frame(read.csv(LabelsPath, row.names = 1))
   # read test path
-  test <- read.csv(TestPath,row.names = 1)
   # transpose dataset to create seurat object
   Data <- t(as.data.frame(Data))
   row.names(Data) <- toupper(row.names(Data))
@@ -80,28 +85,60 @@ run_correlation<-function(RefPath,LabelsPath,TestPath,OutputDir){
   Data <- AverageExpression(Data, return.seurat = TRUE)
   # get mean expression matrix
   Ref_mean <- GetAssayData(Data)
-  # transpose test Dataset
-  test <- t(as.matrix(test))
-  row.names(test) <- toupper(row.names(test))
-  test[1:3,1:3]
-  # Correlation  Training time
-  start_time <- Sys.time()
-  # Predict the cells
-  predicted = as.data.frame(label_correlation(test,Ref_mean,0.45))
-  colnames(predicted) <- c("", "Correlation_Prediction","Correlation_score")
-  end_time <- Sys.time()
-  # get the training and testing time
-  Training_Time_corr <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  
-  setwd(OutputDir)
-  # write down and save the output
-  write.csv(predicted,paste('correlation','_pred.csv', sep = ''),row.names = FALSE)
-  write.csv(Training_Time_corr,paste('correlation','_training_time.csv', sep = ''),row.names = FALSE)
-  write.csv(Training_Time_corr,paste('correlation','_test_time.csv', sep = ''),row.names = FALSE)
-
+  # Loop over test datasets
+  message("@reading test and predicting")
+  # Set a counter
+  i = 1
+  for(Test in TestPaths){
+      # Get current output ir for current query
+      OutputDir <- OutputDirs[[i]]
+      # Read Query
+      test <- fread(Test,data.table=FALSE)
+      row.names(test) <- test$V1
+      test <-  test[, 2:ncol(test)]
+      # transpose test Dataset
+      test <- t(as.matrix(test))
+      row.names(test) <- toupper(row.names(test))
+      # Correlation  Training time
+      start_time <- Sys.time()
+      # Predict the cells
+      predicted = as.data.frame(label_correlation(test,Ref_mean,0.3))
+      colnames(predicted) <- c("", "Correlation_Prediction","Correlation_score")
+      end_time <- Sys.time()
+      # get the training and testing time
+      Training_Time_corr <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+      dir.create(file.path(OutputDir, "correlation"), showWarnings = FALSE)
+      setwd(file.path(OutputDir, "correlation"))
+      # write down and save the output
+      write.csv(predicted,paste('correlation','_pred.csv', sep = ''),row.names = FALSE)
+      write.csv(Training_Time_corr,paste('correlation','_training_time.csv', sep = ''),row.names = FALSE)
+      write.csv(Training_Time_corr,paste('correlation','_test_time.csv', sep = ''),row.names = FALSE)
+      i = i+1
+  }
 }
+# Get Command line arguments
+args <- commandArgs(trailingOnly = TRUE)
+# Split the arguments to form lists
+arguments <- paste(unlist(args),collapse=' ')
+listoptions <- unlist(strsplit(arguments,'--'))[-1]
+# Get individual argument names
+options.args <- sapply(listoptions,function(x){
+         unlist(strsplit(x, ' '))[-1]
+        })
+options.names <- sapply(listoptions,function(x){
+  option <-  unlist(strsplit(x, ' '))[1]
+})
+# Set variables containing command line argument values
+names(options.args) <- unlist(options.names)
+ref <- unlist(options.args['ref'])
+labs <- unlist(options.args['labs'])
 
-run_correlation(args[1], args[2], args[3], args[4])
+test <- unlist(options.args['test'])
+output_dir <- unlist(options.args['output_dir' ])
+
+# Run correlation
+run_correlation(ref,labs, test, output_dir)
+# output info session
 sessionInfo()
 
 

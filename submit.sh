@@ -8,7 +8,7 @@
 #PBS -l vmem=125G
 
 
-cd /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Pipeline
+cd /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Pipeline/Single-Cell-Prediction-Pipeline
 mkdir -p logs
 
 #conda init bash

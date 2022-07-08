@@ -1,27 +1,26 @@
-args <- commandArgs(TRUE)
 
-run_scPred<-function(DataPath,LabelsPath,TestPath,OutputDir){
+
+run_scPred<-function(DataPath,LabelsPath,TestPaths,OutputDirs){
   "
-  run scPred
-  Wrapper script to run scPred on a benchmark dataset with 5-fold cross validation,
-  outputs lists of true and predicted cell labels as csv files, as well as computation time.
+	Author: Hussein Lakkis
+	Date: 2022-06-22
+	run  classifier: scPred 
+	Wrapper script to run an scPred classifier 
+	outputs lists of true and predicted cell labels as csv files, as well as computation time.
   
-  Parameters
-  ----------
-  DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
-  as row names and gene names as column names.
-  LabelsPath : Cell population annotations file path (.csv).
-  CV_RDataPath : Cross validation RData file path (.RData), obtained from Cross_Validation.R function.
-  OutputDir : Output directory defining the path of the exported file.
-  GeneOrderPath : Gene order file path (.csv) obtained from feature selection, 
-  defining the genes order for each cross validation fold, default is NULL.
-   : Number of genes used in case of feature selection (integer), default is NULL.
+	Parameters
+	----------
+	RefPath : Ref Data file path (.csv), cells-genes matrix with cell unique barcodes 
+	as row names and gene names as column names.
+	LabelsPath : Cell population annotations file path (.csv) .
+	TestPaths : Test dataset paths : cells-genes matrix with cell unique barcodes 
+	as row names and gene names as column names.
+	OutputDirs : Output directory defining the path of the exported files for each query.
   "
   
   Data <- read.csv(DataPath,row.names = 1)
   Labels <- as.data.frame(read.csv(LabelsPath, row.names = 1))
   cell_type <- Labels$label
-  Test <- read.csv(TestPath,row.names = 1)
   
   #############################################################################
   #scPred #
@@ -35,7 +34,6 @@ run_scPred<-function(DataPath,LabelsPath,TestPath,OutputDir){
   Training_Time_scPred <- list()
   Testing_Time_scPred <- list()
   Data = t(as.matrix(Data))
-  Test = t(as.matrix(Test))
 
   reference <- CreateSeuratObject(counts = Data, meta.data = Labels)
 
@@ -45,8 +43,6 @@ run_scPred<-function(DataPath,LabelsPath,TestPath,OutputDir){
   ScaleData() %>% 
   RunPCA() %>% 
   RunUMAP(dims = 1:30)
-
-  Test <- CreateSeuratObject(counts = Test)
   
   reference <- getFeatureSpace(reference, "label")
   
@@ -58,23 +54,61 @@ run_scPred<-function(DataPath,LabelsPath,TestPath,OutputDir){
   # plotTrainProbs(scp)
   end_time <- Sys.time()
   Training_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  # scPred Prediction
-  start_time <- Sys.time()
-  scp <- scPredict(Test, reference)
-  end_time <- Sys.time()
-  Testing_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  Pred_Labels_scPred <- getPredictions(scp)$predClass
+  message("@reading test")
+  i = 1
+  scpred <- get_scpred(reference)
+  for(Test in TestPaths){
 
-  Training_Time_scPred <- as.vector(Training_Time_scPred)
-  Testing_Time_scPred <- as.vector(Testing_Time_scPred)
-  
-  setwd(OutputDir)
-  predicted <- data.frame(scPred_Type = Pred_Labels_scPred, row.names = colnames(Test))
-  write.csv(predicted,paste('scPred','_pred.csv', sep = ''),row.names = True)
-  write.csv(Training_Time_corr,paste('scPred','_Training_Time.csv', sep = ''),row.names = FALSE)
-  write.csv(Training_Time_corr,paste('scPred','_Testing_Time.csv', sep = ''),row.names = FALSE)
+      OutputDir <- OutputDirs[[i]]
+      test <- t(as.matrix(read.csv(Test,row.names = 1)))
+      cellnames <- colnames(test)
+      test <- CreateSeuratObject(counts = test)      # train and predict
+      # scPred Prediction
+      start_time <- Sys.time()
+      test <- scPredict(test, scpred,recompute_alignment = FALSE)
+      end_time <- Sys.time()
+      Testing_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+     # tidy up
+      predicted <- data.frame(scPred = test$scpred_prediction, row.names = cellnames)
+
+      colnames(predicted) = c("scPred")
+      dir.create(file.path(OutputDir, "scPred"), showWarnings = FALSE)
+      setwd(file.path(OutputDir, "scPred"))
+      # write down and save the output
+      write.csv(predicted,paste('scPred','_pred.csv', sep = ''))
+      write.csv(Training_Time_scPred,paste0('scPred_training_time.csv'),row.names = FALSE)
+      write.csv(Testing_Time_scPred,paste0('scPred_test_time.csv'),row.names = FALSE)      
+      i = i+1
+  }
 
   
 }
 
-run_scPred(args[1], args[2], args[3], args[4])
+# Get Command line arguments
+args <- commandArgs(trailingOnly = TRUE)
+# Split the arguments to form lists
+arguments <- paste(unlist(args),collapse=' ')
+listoptions <- unlist(strsplit(arguments,'--'))[-1]
+# Get individual argument names
+options.args <- sapply(listoptions,function(x){
+         unlist(strsplit(x, ' '))[-1]
+        })
+options.names <- sapply(listoptions,function(x){
+  option <-  unlist(strsplit(x, ' '))[1]
+})
+# Set variables containing command line argument values
+names(options.args) <- unlist(options.names)
+ref <- unlist(options.args['ref'])
+labs <- unlist(options.args['labs'])
+
+test <- unlist(options.args['test'])
+output_dir <- unlist(options.args['output_dir' ])
+
+run_scPred(ref,labs, test, output_dir)
+
+
+
+sessionInfo()
+
+
+

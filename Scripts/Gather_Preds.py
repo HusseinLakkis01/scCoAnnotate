@@ -1,11 +1,15 @@
 import os 
 import numpy as np
 import pandas as pd
-from sys import argv
 from pathlib import Path
 import re
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", nargs="*", type=str, help="input directory path")
+args = parser.parse_args()
 # Function 
+
 def glob_re(path, regex="_pred.csv", glob_mask="**/*", inverse=False):
 	'''
 	This is a function that looks for all files in the given directory and sub dirs that
@@ -32,6 +36,8 @@ def run_concat(Results_Folder_Path):
 	Results_Folder_Path: Path to results folder
 	'''
 	paths = glob_re(Results_Folder_Path, regex="_pred.csv", glob_mask="**/*", inverse=False)
+	print(paths)
+	print(paths[0])
 	result = pd.read_csv(paths[0],index_col = 0)
 	for path in paths[1:]:
 		current = pd.read_csv(path, index_col = 0)
@@ -41,5 +47,8 @@ def run_concat(Results_Folder_Path):
 	os.chdir(Results_Folder_Path)
 	result.to_csv("Prediction_Summary.tsv", sep = "\t", index = True)
 
-
-run_concat(argv[1])
+print(args.input)
+args.input = [arg for arg in args.input if os.path.isdir(arg) ]
+for args in args.input:
+	print(args)
+	run_concat(args)
