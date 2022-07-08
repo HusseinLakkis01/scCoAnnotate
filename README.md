@@ -76,7 +76,7 @@ An example of the submission file is also available in this repository and is ca
 
 ``` bash 
 #!/usr/bin/bash
-#PBS -N Snakemake)_Pipeline
+#PBS -N scCoAnnotate
 #PBS -o logs/err.txt
 #PBS -e logs/out.txt
 #PBS -l walltime=20:00:00
