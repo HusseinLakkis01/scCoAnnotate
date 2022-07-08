@@ -28,6 +28,7 @@ Current version of snakemake is snakemake/5.32.0
 # Quickstart
 
 Using snakemake is straight forward and simple. The rules and processes are arranged as per this rule graph:
+
 [rulegraph.pdf](https://github.com/HusseinLakkis01/scCoAnnotate/files/9074481/rulegraph.pdf)
 
 
