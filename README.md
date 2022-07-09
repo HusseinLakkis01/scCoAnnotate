@@ -132,8 +132,6 @@ snakemake --use-conda --configfile config.yml --cores 3
 11. [scPred](https://github.com/powellgenomicslab/scPred)
 12. [scmap (cell and cluster)](https://bioconductor.org/packages/release/bioc/html/scmap.html)
 
-and many tools such as scMap Cell and my own classifier are being tested to be integrated in the pipeline.
-
 
 
 # Packages Required:
@@ -176,6 +174,7 @@ tidyverse == 1.3.1
 # Adding New Tools:
 
 to add new tools, you have to add this template to the the snakefile as such:
+
 ``` python
 rule {tool_name}:
   input:
