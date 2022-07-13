@@ -92,6 +92,5 @@ test <- unlist(options.args['test'])
 output_dir <- unlist(options.args['output_dir' ])
 
 
-
-
 run_CHETAH(ref,labs, test, output_dir)
+sessionInfo()

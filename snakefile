@@ -1,11 +1,32 @@
 import os
 # Get the names of query samples from the paths given in the test section of the config
 samples = [os.path.basename(os.path.dirname(test_path)) for test_path in config["test"]]
+tools = config['tools_to_run']
 # Create subdirectories for each query sample
 for sample in samples:
   path = "{output_dir}/{sample}".format(output_dir = config["output_dir"], sample = sample)
   if not os.path.exists(path):
     os.mkdir(path)
+
+output = expand(
+  "{output_dir}/{sample}/{tool}/{tool}_pred.csv",
+  tool= config['tools_to_run'],
+  output_dir=config["output_dir"],
+  sample  = samples)
+
+to_run = []
+for tool in tools:
+  alreadyrun = True
+  for sample in samples:
+    path = "{output_dir}/{sample}/{tool}/{tool}_pred.csv".format(output_dir = config["output_dir"], sample = sample, tool = tool)
+    if not os.path.isfile(path):
+      alreadyrun = False
+  if alreadyrun == False:
+    to_run.append(tool)
+
+
+
+
 
 """
 One rule that directs the DAG which is represented in the rulegraph
@@ -18,7 +39,7 @@ rule all:
         sample  = samples),
       res2= expand(
         "{output_dir}/{sample}/{tool}/{tool}_pred.csv",
-        tool=config["tools_to_run"],
+        tool=to_run,
         output_dir=config["output_dir"],
         sample  = samples)
 
@@ -28,7 +49,7 @@ rule all:
 rule concat:
   input:
       results = expand("{output_dir}/{sample}/{tool}/{tool}_pred.csv",
-        tool=config["tools_to_run"],
+        tool=to_run,
         output_dir=config["output_dir"],
         sample  = samples),
       sample =  expand("{output_dir}/{sample}",

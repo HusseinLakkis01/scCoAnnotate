@@ -24,11 +24,12 @@ def run_ACTINN(RefPath, LabelsPath, TestPaths, OutputDirs):
 	as row names and gene names as column names.
 	OutputDirs : Output directory defining the path of the exported files for each query.
   	"""
-	# read the data sets
-	tmp = "/project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Prediction-Pipeline/Single-Cell-Prediction-Pipeline/tmp"
+	# create temp folder for ACTINN output
+	tmp = "temp"
 	tmp_path = os.path.abspath(tmp)
 	if not os.path.exists(tmp_path):
 		os.mkdir(tmp)
+	# read the data sets
 	reference = pd.read_csv(RefPath,index_col=0,sep=',')
 	labels = pd.read_csv(LabelsPath, header = 0, index_col=0)
 	os.chdir(tmp)
@@ -46,7 +47,7 @@ def run_ACTINN(RefPath, LabelsPath, TestPaths, OutputDirs):
 	del(train)
 	tm.sleep(60)
 	# RUN ACTINN formatting
-	os.system("python /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Prediction-Pipeline/Single-Cell-Prediction-Pipeline/Scripts/ACTINN_scripts/actinn_format.py -i {tmp}/train.csv -o {tmp}/train -f csv".format(tmp = tmp))
+	os.system("python ../Scripts/ACTINN_scripts/actinn_format.py -i {tmp}/train.csv -o {tmp}/train -f csv".format(tmp = tmp_path))
 
 	i = 0
 	for test in TestPaths: 
@@ -56,15 +57,15 @@ def run_ACTINN(RefPath, LabelsPath, TestPaths, OutputDirs):
 		test = np.log1p(test)
 		test = test.transpose()
 		test.to_csv("test.csv")
-		os.system("python /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Prediction-Pipeline/Single-Cell-Prediction-Pipeline/Scripts/ACTINN_scripts/actinn_format.py -i {tmp}/test.csv -o {tmp}/test -f csv".format(tmp = tmp))
+		os.system("python ../Scripts/ACTINN_scripts/actinn_format.py -i {tmp}/test.csv -o {tmp}/test -f csv".format(tmp = tmp_path))
 		# measure total time
 		start = tm.time()
 		# execute the actinn prediction file
-		os.system("python /project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Prediction-Pipeline/Single-Cell-Prediction-Pipeline/Scripts/ACTINN_scripts/actinn_predict.py -trs {tmp}/train.h5 -trl {tmp}/train_lab.csv -ts {tmp}/test.h5 -o {tmp} -op False ".format(tmp = tmp))	
+		os.system("python ../Scripts/ACTINN_scripts/actinn_predict.py -trs {tmp}/train.h5 -trl {tmp}/train_lab.csv -ts {tmp}/test.h5 -o {tmp} -op False ".format(tmp = tmp_path))	
 		tot.append(tm.time()-start)
 		tm.sleep(60)
 		# read predictions and probabilities
-		predlabels = pd.read_csv('{tmp}/predicted_label.txt'.format(tmp = tmp),header=0,index_col=0, sep='\t')
+		predlabels = pd.read_csv('{tmp}/predicted_label.txt'.format(tmp = tmp_path),header=0,index_col=0, sep='\t')
 		pred = pd.DataFrame({"ACTINN":predlabels['celltype']}, index = predlabels.index)
 		tot_time = pd.DataFrame(tot)
 		# output the files
@@ -91,4 +92,4 @@ args.output_dir = [arg for arg in args.output_dir if os.path.isdir(arg) ]
 # run function with arguments provided 
 run_ACTINN(args.ref, args.labs, args.test, args.output_dir)
 
-shutil.rmtree("/project/kleinman/hussein.lakkis/from_hydra/2021_07_15-Prediction-Pipeline/Single-Cell-Prediction-Pipeline/tmp", ignore_errors=True)
+shutil.rmtree("temp", ignore_errors=True)
