@@ -1,0 +1,14 @@
+Building DAG of jobs...
+Nothing to be done.
+Complete log: /project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate/Benchmarking/.snakemake/log/2022-09-08T145117.724678.snakemake.log
+Executing main workflow.
+Creating report...
+Adding Prediction_Summary.tsv (0.33 MB).
+Adding Prediction_Summary.tsv (0.49 MB).
+Adding Prediction_Summary.tsv (0.95 MB).
+WorkflowError in line 97 of /project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate/snakefile:
+Failed to resolve wildcards.
+AttributeError: 'Wildcards' object has no attribute 'sample'
+  File "/project/kleinman/modules/software/miniconda/3.8/envs/snakemake/lib/python3.9/site-packages/snakemake/report/__init__.py", line 651, in auto_report
+  File "/project/kleinman/modules/software/miniconda/3.8/envs/snakemake/lib/python3.9/site-packages/snakemake/report/__init__.py", line 632, in register_file
+  File "/project/kleinman/modules/software/miniconda/3.8/envs/snakemake/lib/python3.9/site-packages/snakemake/report/__init__.py", line 213, in __init__

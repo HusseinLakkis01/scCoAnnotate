@@ -1,0 +1,13 @@
+Building DAG of jobs...
+Nothing to be done.
+Complete log: /project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate/Benchmarking/.snakemake/log/2022-09-08T153008.691643.snakemake.log
+Executing main workflow.
+Creating report...
+Adding Prediction_Summary.tsv (0.33 MB).
+Adding Prediction_Summary.tsv (0.49 MB).
+Adding Prediction_Summary.tsv (0.95 MB).
+Adding Consensus.png (0.031 MB).
+Adding Consensus.png (0.023 MB).
+Adding Consensus.png (0.052 MB).
+Downloading resources and rendering HTML.
+Report created: report.html.

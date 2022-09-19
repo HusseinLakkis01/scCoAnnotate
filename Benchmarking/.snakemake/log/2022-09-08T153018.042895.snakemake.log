@@ -1,0 +1,24 @@
+Building DAG of jobs...
+Nothing to be done.
+Complete log: /project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate/Benchmarking/.snakemake/log/2022-09-08T153018.042895.snakemake.log
+Executing main workflow.
+Using shell: /usr/bin/bash
+Provided cores: 2
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	all
+	1	concat
+	1	plot
+	3
+Select jobs to execute...
+
+[Thu Sep  8 15:30:18 2022]
+rule concat:
+    input: /project/kleinman/hussein.lakkis/from_hydra/test/BT2016062, /project/kleinman/hussein.lakkis/from_hydra/test/P-1694_S-1694_multiome, /project/kleinman/hussein.lakkis/from_hydra/test/P-1701_S-1701_multiome
+    output: /project/kleinman/hussein.lakkis/from_hydra/test/BT2016062/Prediction_Summary.tsv, /project/kleinman/hussein.lakkis/from_hydra/test/P-1694_S-1694_multiome/Prediction_Summary.tsv, /project/kleinman/hussein.lakkis/from_hydra/test/P-1701_S-1701_multiome/Prediction_Summary.tsv
+    log: /project/kleinman/hussein.lakkis/from_hydra/test/BT2016062/Gatherpreds.log, /project/kleinman/hussein.lakkis/from_hydra/test/P-1694_S-1694_multiome/Gatherpreds.log, /project/kleinman/hussein.lakkis/from_hydra/test/P-1701_S-1701_multiome/Gatherpreds.log
+    jobid: 1
+
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.
