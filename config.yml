@@ -1,17 +1,39 @@
+# target directory
 output_dir: /project/kleinman/hussein.lakkis/from_hydra/test
-reference: /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/reference.csv
-labfile: /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/labels.csv
-test:
+# path to reference to train classifiers on (cell x gene raw counts)
+training_reference: /project/kleinman/hussein.lakkis/from_hydra/2022_01_10-Datasets/Cortex/p0/expression.csv
+# path to annotations for the reference (csv file with cellname and label headers)
+reference_annotations: /project/kleinman/hussein.lakkis/from_hydra/2022_01_10-Datasets/Cortex/p0/labels.csv
+# path to query datasets (cell x gene raw counts)
+query_datasets:
       - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2016062/expression.csv
-      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2018022/expression.csv
-      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1190_S-1197/expression.csv
-      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1569_S-1569/expression.csv
       - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1694_S-1694_multiome/expression.csv
       - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1701_S-1701_multiome/expression.csv
+# step to check if some genes are kept in the common gene space between ref and query
+check_genes: False
+# path for the genes required
+genes_required: Null
+# rejection option for SVM
 rejection: True
+# classifiers to run
 tools_to_run:
       - ACTINN
-
+      - scHPL
+      - scClassify
+      - correlation
+      - scmapcluster
+      - scPred
+      - SingleCellNet
+      - SVM_reject
+      - SingleR
+      - CHETAH
+      - scmapcell
+      - SciBet
+# benchmark tools on reference
+benchmark: False
+plots: True
+consensus:
+      - 
 
 
 
