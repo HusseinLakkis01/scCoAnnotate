@@ -1,6 +1,11 @@
+# load libraries
+library(scPred)
+library(tidyverse)
+library(magrittr)
+library(Seurat)
+library(data.table)
 
-
-run_scPred<-function(DataPath,LabelsPath,TestPaths,OutputDirs){
+run_scPred<-function(RefPath, LabelsPath, QueryPaths, OutputDirs){
   "
 	Author: Hussein Lakkis
 	Date: 2022-06-22
@@ -10,33 +15,33 @@ run_scPred<-function(DataPath,LabelsPath,TestPaths,OutputDirs){
   
 	Parameters
 	----------
-	RefPath : Ref Data file path (.csv), cells-genes matrix with cell unique barcodes 
+	RefPath : Training reference data file path (.csv), cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
 	LabelsPath : Cell population annotations file path (.csv) .
-	TestPaths : Test dataset paths : cells-genes matrix with cell unique barcodes 
+	QueryPaths : Test dataset paths : cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
 	OutputDirs : Output directory defining the path of the exported files for each query.
   "
   
-  Data <- read.csv(DataPath,row.names = 1)
-  Labels <- as.data.frame(read.csv(LabelsPath, row.names = 1))
-  cell_type <- Labels$label
+  # Read the Reference expression matrix
+  Ref <- fread(RefPath,data.table=FALSE)
+  row.names(Ref) <- Ref$V1
+  Ref <-  Ref[, 2:ncol(Ref)]
+
+  # Read reference labels
+  Labels <- as.data.frame(read.csv(LabelsPath))
   
   #############################################################################
   #scPred #
   #############################################################################
-  library(scPred)
-  library(tidyverse)
-  library(magrittr)
-  library(Seurat)
 
-  Pred_Labels_scPred <- list()
-  Training_Time_scPred <- list()
-  Testing_Time_scPred <- list()
-  Data = t(as.matrix(Data))
+  Ref <- t(as.matrix(Ref))
 
-  reference <- CreateSeuratObject(counts = Data, meta.data = Labels)
+  # create seurat object for the reference
+  reference <- CreateSeuratObject(counts = Ref)
+  reference$cell_type <- Labels$label
 
+  # Normalize and find dim red
   reference <- reference %>% 
   NormalizeData() %>% 
   FindVariableFeatures() %>% 
@@ -44,46 +49,68 @@ run_scPred<-function(DataPath,LabelsPath,TestPaths,OutputDirs){
   RunPCA() %>% 
   RunUMAP(dims = 1:30)
   
-  reference <- getFeatureSpace(reference, "label")
-  
+  reference <- getFeatureSpace(reference, "cell_type")
+
   # scPred Training
   start_time <- Sys.time()
   set.seed(1234)
-  # plotEigen(scp, group = 'cell_type1')
   reference <- trainModel(reference)
-  # plotTrainProbs(scp)
   end_time <- Sys.time()
-  Training_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-  message("@reading test")
-  i = 1
-  scpred <- get_scpred(reference)
-  for(Test in TestPaths){
 
+  # get training time
+  Training_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
+
+  # Loop over query samples
+  message("@reading query")
+  i = 1
+
+  # get the trained model
+  scpred <- get_scpred(reference)
+  
+  # Loop over query datasets
+  message("@reading query and predicting")
+
+  # Set a counter
+  i = 1
+
+  # Loop
+  for(query in QueryPaths){
+      # Get current output ir for current query
       OutputDir <- OutputDirs[[i]]
-      test <- t(as.matrix(read.csv(Test,row.names = 1)))
-      cellnames <- colnames(test)
-      test <- CreateSeuratObject(counts = test)      # train and predict
+
+      # Read Query
+      query <- fread(query,data.table=FALSE)
+      row.names(query) <- query$V1
+      query <-  query[, 2:ncol(query)]
+
+      cellnames <- row.names(query)
+
+      # create seurat obeject
+      query <- t(query)
+      query <- CreateSeuratObject(counts = query)      
+      
       # scPred Prediction
       start_time <- Sys.time()
-      test <- scPredict(test, scpred,recompute_alignment = FALSE)
+      query <- scPredict(query, scpred,recompute_alignment = FALSE)
       end_time <- Sys.time()
-      Testing_Time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
-     # tidy up
-      predicted <- data.frame(scPred = test$scpred_prediction, row.names = cellnames)
+      Query_time_scPred <- as.numeric(difftime(end_time,start_time,units = 'secs'))
 
-      colnames(predicted) = c("scPred")
+     # tidy up
+      predictions <- data.frame(scPred = query$scpred_prediction, row.names = cellnames)
+
+      # Create scPred subdir in target dir
       dir.create(file.path(OutputDir, "scPred"), showWarnings = FALSE)
       setwd(file.path(OutputDir, "scPred"))
+
       # write down and save the output
-      write.csv(predicted,paste('scPred','_pred.csv', sep = ''))
-      write.csv(Training_Time_scPred,paste0('scPred_training_time.csv'),row.names = FALSE)
-      write.csv(Testing_Time_scPred,paste0('scPred_test_time.csv'),row.names = FALSE)      
+      write.csv(predictions,paste('scPred','_pred.csv', sep = ''))
+      write.csv(Training_Time_scPred,paste('scPred','_training_time.csv', sep = ''),row.names = FALSE)
+      write.csv(Query_time_scPred,paste('scPred','_query_time.csv', sep = ''),row.names = FALSE)
       i = i+1
   }
-
-  
 }
 
+  
 # Get Command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 # Split the arguments to form lists
@@ -101,11 +128,10 @@ names(options.args) <- unlist(options.names)
 ref <- unlist(options.args['ref'])
 labs <- unlist(options.args['labs'])
 
-test <- unlist(options.args['test'])
+query <- unlist(options.args['query'])
 output_dir <- unlist(options.args['output_dir' ])
 
-run_scPred(ref,labs, test, output_dir)
-
+run_scPred(ref,labs, query, output_dir)
 
 
 sessionInfo()
