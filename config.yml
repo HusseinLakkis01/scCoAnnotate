@@ -33,7 +33,7 @@ tools_to_run:
 benchmark: False
 plots: True
 consensus:
-      - 
+      - all
 
 
 
