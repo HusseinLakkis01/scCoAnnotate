@@ -305,6 +305,7 @@ if __name__ == '__main__':
     args.learning_rate, args.num_epochs, args.minibatch_size, args.print_cost)
     test_predict = predict(test_set, parameters)
     predicted_label = []
+    
     for i in range(len(test_predict)):
         predicted_label.append(label_to_type_dict[test_predict[i]])
     predicted_label = pd.DataFrame({"cellname":barcode, "celltype":predicted_label})
