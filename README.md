@@ -2,7 +2,7 @@
 
 # Summary
 
-scRNA seq based Prediction of cell-types using a fast and efficient pipeline to increase automation and reduce the need to run several scripts and experiments. The pipeline allows the user to select what single-cell projection tools they want to run on a selected reference to annotate a list of query datasets. It then outputs a consensus of the predictions across tools selected. This pipeline trains classifiers on genes common to the reference and all query datasets. 
+scRNA seq based prediction of cell-types using a fast and efficient pipeline to increase automation and reduce the need to run several scripts and experiments. The pipeline allows the user to select what single-cell projection tools they want to run on a selected reference to annotate a list of query datasets. It then outputs a consensus of the predictions across tools selected. This pipeline trains classifiers on genes common to the reference and all query datasets. 
 
 The pipeline also features parallelization options to exploit the computational resources available. 
 
@@ -32,8 +32,7 @@ Using snakemake is straight forward and simple. The rules and processes are arra
 Rule preprocess gets the common genes and creates temporary reference and query datasets based ob the common genes. Rule concat appends all predictions into one tab seperate file (prediction_summary.tsv) and gets the consensus prediction
 
 
-![save_as_a_png](https://user-images.githubusercontent.com/59002771/178054140-e7129733-6a8f-4819-8162-c29b3954d303.png)
-
+![dag](https://user-images.githubusercontent.com/59002771/191146873-5c680bbd-d11c-418c-ae96-7662ee7f99ed.png)
 
 
 
@@ -45,51 +44,86 @@ snakemake --use-conda --configfile config.yml --cores 3
 
 ##  Config File:
 ```yaml 
+# target directory
 output_dir: <path to outputs directory>
-reference: <path to reference csv file with RAW counts per cell, genes as columns and cells as rows>
-labfile: <csv with labels per cell, the column header for the labels should be "label">
-test: - <path to test csv file 1 with RAW counts per cell, genes as columns and cells as rows>
-      - <path to test csv file 2 with RAW counts per cell, genes as columns and cells as rows>
+# path to reference to train classifiers on (cell x gene raw counts)
+training_reference: <path to reference csv file with RAW counts per cell, genes as columns and cells as rows>
+# path to annotations for the reference (csv file with cellname and label headers)
+reference_annotations: <csv with labels per cell, the column header for the labels should be "label">
+# path to query datasets (cell x gene raw counts)
+query_datasets:
+      - <path to query csv file 1 with RAW counts per cell, genes as columns and cells as rows>
+      - <path to query csv file 2 with RAW counts per cell, genes as columns and cells as rows>
       .
       .
+# step to check if required genes are kept between query and reference
+check_genes: False
+# path for the genes required
+genes_required: Null
+# rejection option for SVM
+rejection: True
+# classifiers to run
+tools_to_run:
+      - <tool 1>
+      - <tool 2>
       .
-rejection: <whether or not to reject poorly classified cells by SVM, default is True>
-tools_to_run: # List of tools to run
-  - <tool 1>
-  - <tool 2>
-  - <...>
+      .
+# benchmark tools on reference
+benchmark: False
+plots: True
+consensus:
+      - <tool 1>
+      - <tool 2>
+      .
+
 ```
+
 
 ### An Example Config is attached 
 
 ```yaml 
+# target directory
 output_dir: /project/kleinman/hussein.lakkis/from_hydra/test
-reference: /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/reference.csv
-labfile: /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/reference/labels.csv
-test:
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2016062/expression.csv
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2018022/expression.csv
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1190_S-1197/expression.csv
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1569_S-1569/expression.csv
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1694_S-1694_multiome/expression.csv
-      - /projects/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1701_S-1701_multiome/expression.csv
+# path to reference to train classifiers on (cell x gene raw counts)
+training_reference: /project/kleinman/hussein.lakkis/from_hydra/2022_01_10-Datasets/Cortex/p0/expression.csv
+# path to annotations for the reference (csv file with cellname and label headers)
+reference_annotations: /project/kleinman/hussein.lakkis/from_hydra/2022_01_10-Datasets/Cortex/p0/labels.csv
+# path to query datasets (cell x gene raw counts)
+query_datasets:
+      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/BT2016062/expression.csv
+      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1694_S-1694_multiome/expression.csv
+      - /project/kleinman/hussein.lakkis/from_hydra/Collab/HGG_Selin_Revision/test/P-1701_S-1701_multiome/expression.csv
+# step to check if required genes are kept between query and reference
+check_genes: False
+# path for the genes required
+genes_required: Null
+# rejection option for SVM
 rejection: True
+# classifiers to run
 tools_to_run:
-      - scmapcell
-      - scmapcluster
       - ACTINN
-      - SVM_reject
-      - SingleCellNet
-      - SciBet
       - scHPL
+      - scClassify
       - correlation
+      - scmapcluster
+      - scPred
+      - SingleCellNet
+      - SVM_reject
+      - SingleR
       - CHETAH
-      - correlation
+      - scmapcell
+      - SciBet
+# benchmark tools on reference
+benchmark: False
+plots: True
+consensus:
+      - all
 ```
 
 ## Submission File:
 
-An example of the submission file is also available in this repository and is called submit.sh
+An example of the submission file is also available in this repository and is called submit.sh. This is for TORQUE schedulers.
+
 
 ``` bash 
 #!/usr/bin/bash
@@ -175,26 +209,27 @@ tidyverse == 1.3.1
 
 to add new tools, you have to add this template to the the snakefile as such:
 
-``` python
-rule {tool_name}:
+``` R
+rule {rulename}:
   input:
     reference = "{output_dir}/expression.csv".format(output_dir =config['output_dir']),
-    labfile = config["labfile"],
-    test = expand("{output_dir}/{sample}/expression.csv",sample = samples,output_dir=config['output_dir']),
+    labfile = config['reference_annotations'],
+    query = expand("{output_dir}/{sample}/expression.csv",sample = samples,output_dir=config['output_dir']),
     output_dir =  expand("{output_dir}/{sample}",sample = samples,output_dir=config['output_dir'])
 
   output:
-    pred = expand("{output_dir}/{sample}/{tool_name}/{tool_name}_pred.csv", sample  = samples,output_dir=config["output_dir"]),
-    test_time = expand("{output_dir}/{sample}/{tool_name}/{tool_name}_test_time.csv",sample  = samples,output_dir=config["output_dir"]),
-    training_time = expand("{output_dir}/{sample}/{tool_name}/{tool_name}_training_time.csv",sample  = samples,output_dir=config["output_dir"])
-  log: expand("{output_dir}/{sample}/{tool_name}/{tool_name}.log", sample = samples,output_dir=config["output_dir"])
+    pred = expand("{output_dir}/{sample}/{rulename}/{rulename}_pred.csv", sample  = samples,output_dir=config["output_dir"]),
+    query_time = expand("{output_dir}/{sample}/{rulename}/{rulename}_query_time.csv",sample  = samples,output_dir=config["output_dir"]),
+    training_time = expand("{output_dir}/{sample}/{rulename}/{rulename}_training_time.csv",sample  = samples,output_dir=config["output_dir"])
+  log: expand("{output_dir}/{sample}/{rulename}/{rulename}.log", sample = samples,output_dir=config["output_dir"])
   shell:
-    "Rscript Scripts/run_{tool_name}.R "
+    "Rscript Scripts/run_{rulename}.R "
     "--ref {input.reference} "
     "--labs {input.labfile} "
-    "--test {input.test} "
+    "--query {input.query} "
     "--output_dir {input.output_dir} "
-    "&> {log}"
+    "&> {log}"   
+
  ```   
  The tool script you add must generate outputs that match the output of the rule..
 
