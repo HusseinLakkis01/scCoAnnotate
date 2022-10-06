@@ -8,10 +8,6 @@ library(tidyverse)
 
 source("/project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate/Scripts/style/theme_min_SelinJessa.R")
 
-<<<<<<< HEAD
-
-=======
->>>>>>> dc12989f742adcdd8eb266b5111ca1bd54f174f1
 plot_figures <- function(TestPaths,OutputDirs){
   "
 	Author: Hussein Lakkis
