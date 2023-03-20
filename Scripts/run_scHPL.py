@@ -7,20 +7,21 @@ import time as tm
 from scHPL import progressive_learning, predict, evaluate
 
 def run_scHPL(RefPath, LabelsPath, QueryPaths, OutputDirs):
-	'''
-	run scHPL
-	Wrapper script to run scHPL on a benchmark dataset with 5-fold cross validation,
+	"""
+	Author: Hussein Lakkis
+	Date: 2023-03-19
+	run  classifier: scHPL 
+	Wrapper script to run an scHPL classifier 
 	outputs lists of true and predicted cell labels as csv files, as well as computation time.
-  
 	Parameters
 	----------
-	RefPath : Training Reference file path (.csv), cells-genes matrix with cell unique barcodes 
+	RefPath : Reference Dataset file path (.csv), cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
-	LabelsPath : Cell population annotations file path (.csv).
-	QueryPaths: Query dataset paths : cells-genes matrix with cell unique barcodes 
-	OutputDir : Output directory defining the path of the predictions
-
-	'''
+	LabelsPath : Cell type annotations file path (.csv) with 'label' header .
+	QueryPaths : Query dataset paths : cells-genes matrix with cell unique barcodes 
+	as row names and gene names as column names.
+	OutputDirs : Output directory defining the path of the exported files for each query.
+  	"""
 	
 	print("@Reading the reference expression file")
 
