@@ -10,15 +10,18 @@ import time as tm
 def run_SVM_reject(RefPath, LabelsPath, QueryPaths, OutputDirs, rejection):
 	'''
 	run SVM_reject
-	Wrapper script to run SVM_reject on a benchmark dataset with 5-fold cross validation,
-	outputs lists of true and predicted cell labels as csv files, as well as computation time.
+	Wrapper script to train SVM_reject on a referenxe dataset with 5-fold cross validation,
+	outputs lists of predicted query cell labels as csv files, as well as computation time.
   
 	Parameters
 	----------
-	DataPath : Data file path (.csv), cells-genes matrix with cell unique barcodes 
+	RefPath : Reference dataset file path (.csv), cells-genes matrix with cell unique barcodes 
 	as row names and gene names as column names.
 	LabelsPath : Cell population annotations file path (.csv).
-	OutputDir : Output directory defining the path of the predictions
+	QueryPaths: Query datasets file path (.csv), cells-genes matrix with cell unique barcodes 
+	as row names and gene names as column names.
+	OutputDir : Output directory defining the path of the predictions.
+	rejection: Option to reject cells with prediction probability below thresold: Bool
 
 	'''
 	# get rejectiom
