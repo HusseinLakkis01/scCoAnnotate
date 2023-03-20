@@ -2,7 +2,7 @@
 
 # Summary
 
-scRNA seq based prediction of cell-types using a fast and efficient pipeline to increase automation and reduce the need to run several scripts and experiments. The pipeline allows the user to select what single-cell projection tools they want to run on a selected reference to annotate a list of query datasets. It then outputs a consensus of the predictions across tools selected. This pipeline trains classifiers on genes common to the reference and all query datasets. 
+scRNA-seq based prediction of cell-types using a fast and efficient Snakemake pipeline to increase automation and reduce the need to run several scripts and experiments. The pipeline allows the user to select what single-cell annotation tools they want to run on a selected reference to annotate a list of query datasets. It then outputs a consensus of the predictions across tools selected. This pipeline trains classifiers on genes common to the reference and all query datasets. 
 
 The pipeline also features parallelization options to exploit the computational resources available. 
 
