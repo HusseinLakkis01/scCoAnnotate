@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#PBS -N Zaza_Pipeline
+#PBS -N Test_Submission
 #PBS -o logs/err.txt
 #PBS -e logs/out.txt
 #PBS -l walltime=20:00:00
@@ -8,7 +8,7 @@
 #PBS -l vmem=125G
 
 
-cd /project/kleinman/hussein.lakkis/from_hydra/scCoAnnotate
+cd /scCoAnnotate/
 mkdir -p logs
 
 #conda init bash
